@@ -1,4 +1,3 @@
-// frontend/src/services/api.js - VERSIÓN CORREGIDA Y MEJORADA
 import axios from 'axios';
 
 /**
@@ -10,6 +9,7 @@ import axios from 'axios';
  * - Manejo robusto de errores
  * - Retry automático con backoff
  * - Logging mejorado
+ * - Sin errores de exportación duplicada
  */
 
 // Función para detectar y configurar la URL base de la API
@@ -301,7 +301,7 @@ export const handleAPIError = (error) => {
 };
 
 // Funciones de diagnóstico
-export const diagnostics = {
+const diagnostics = {
   // Verificar conectividad básica
   async checkConnectivity() {
     try {
@@ -377,11 +377,10 @@ console.table({
   'Platform': process.env.RAILWAY_ENVIRONMENT ? 'Railway' : 'Standard'
 });
 
-// Exportar funciones principales
+// Exportar funciones principales (SIN diagnostics para evitar duplicación)
 export { 
   api,
-  retryRequest,
-  diagnostics
+  retryRequest
 };
 
 // Exportar como default para compatibilidad
