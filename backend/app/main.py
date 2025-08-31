@@ -284,15 +284,22 @@ def clear_cache():
     return {"message": "Cache cleared successfully"}
 
 # === SERVIR FRONTEND REACT ===
-# Montar archivos estáticos del frontend
-static_path = "/app/static"
-if os.path.exists(static_path):
-    # Servir archivos estáticos (JS, CSS, etc.)
-    app.mount("/static", StaticFiles(directory=static_path), name="static_files")
+# Verificar que existan los directorios
+build_dir = "/app/static"
+static_files_dir = "/app/static/static"  # React build pone CSS/JS en /static/static/
+
+# Montar archivos CSS/JS (desde /app/static/static/ a /static/)
+if os.path.exists(static_files_dir):
+    app.mount("/static", StaticFiles(directory=static_files_dir), name="static_files")
+    logger.info(f"✅ Serving React static files from: {static_files_dir}")
+else:
+    logger.warning(f"⚠️ React static files directory not found: {static_files_dir}")
+
+# Servir archivos del build (manifest, favicon, etc.)
+if os.path.exists(build_dir):
+    logger.info(f"✅ Build directory found: {build_dir}")
     
-    logger.info(f"✅ Serving static files from: {static_path}")
-    
-    # Catch-all para servir React App (debe estar al final)
+    # Catch-all para servir React App
     @app.get("/{full_path:path}")
     async def serve_react_app(full_path: str):
         """Servir la aplicación React para todas las rutas que no sean API"""
@@ -302,23 +309,28 @@ if os.path.exists(static_path):
         if any(full_path.startswith(route) for route in api_routes):
             raise HTTPException(status_code=404, detail="API endpoint not found")
         
+        # Servir archivos específicos (manifest.json, favicon.ico, etc.)
+        if full_path in ["manifest.json", "favicon.ico", "robots.txt", "asset-manifest.json"]:
+            file_path = os.path.join(build_dir, full_path)
+            if os.path.exists(file_path):
+                return FileResponse(file_path)
+        
         # Servir index.html para todas las demás rutas (React Router)
-        index_path = os.path.join(static_path, "index.html")
+        index_path = os.path.join(build_dir, "index.html")
         if os.path.exists(index_path):
             return FileResponse(index_path)
         else:
-            # Si no existe el build del frontend, mostrar mensaje informativo
             return {
-                "message": "Frontend not built yet",
-                "note": "The React frontend will be available after the build completes",
+                "message": "Frontend build not found",
+                "note": "React app is not available yet",
                 "api_available": True,
                 "try_endpoints": ["/health", "/asteroids/", "/info"]
             }
 
 else:
-    logger.warning("⚠️ Static files directory not found. Frontend will not be served.")
+    logger.warning("⚠️ Build directory not found. Frontend will not be served.")
     
-    # Endpoint raíz alternativo cuando no hay frontend
+    # Endpoint raíz cuando no hay frontend
     @app.get("/")
     def read_root():
         """Información básica cuando no hay frontend"""
@@ -326,7 +338,7 @@ else:
             "name": "NEO Tracker API",
             "version": "1.0.0",
             "description": "API para monitoreo de asteroides cercanos a la Tierra",
-            "status": "API only - Frontend building",
+            "status": "API only - Frontend not built",
             "data_source": "NASA NeoWs API",
             "nasa_api_key_configured": NASA_API_KEY != "DEMO_KEY",
             "available_endpoints": [
