@@ -1,6 +1,8 @@
-# backend/app/main.py - VERSIÓN CON DATOS REALES DE NASA
+# backend/app/main.py - VERSIÓN CON DATOS REALES DE NASA + FRONTEND
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 import requests
 import os
 from datetime import datetime, timedelta
@@ -18,10 +20,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Configurar CORS
+# Configurar CORS - Incluir Railway
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://127.0.0.1:3000",
+        "https://neo-tracker-francisco-production.up.railway.app",
+        "*"  # Para desarrollo - quitar en producción final
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -114,15 +121,15 @@ def fetch_nasa_data():
 def get_asteroids_data():
     """Obtener datos de asteroides (con cache)"""
     if is_cache_valid() and cache["asteroids"] is not None:
-        logger.info("📋 Using cached asteroid data")
+        logger.info("🔋 Using cached asteroid data")
         return cache["asteroids"]
     
     return fetch_nasa_data()
 
-# === ENDPOINTS ===
+# === ENDPOINTS DE API ===
 
-@app.get("/")
-def read_root():
+@app.get("/api/")
+def api_root():
     """Información básica de la API"""
     return {
         "name": "NEO Tracker API",
@@ -131,11 +138,11 @@ def read_root():
         "data_source": "NASA NeoWs API",
         "nasa_api_key_configured": NASA_API_KEY != "DEMO_KEY",
         "endpoints": [
-            "/asteroids/",
-            "/asteroids/{id}",
-            "/asteroids/dangerous/",
-            "/asteroids/upcoming/",
-            "/health"
+            "/api/asteroids/",
+            "/api/asteroids/{id}",
+            "/api/asteroids/dangerous/",
+            "/api/asteroids/upcoming/",
+            "/api/health"
         ]
     }
 
@@ -160,6 +167,7 @@ def health_check():
     }
 
 @app.get("/asteroids/")
+@app.get("/api/asteroids/")
 def get_all_asteroids():
     """Obtener todos los asteroides"""
     try:
@@ -171,6 +179,7 @@ def get_all_asteroids():
         raise
 
 @app.get("/asteroids/{asteroid_id}")
+@app.get("/api/asteroids/{asteroid_id}")
 def get_asteroid_by_id(asteroid_id: str):
     """Obtener asteroide específico por ID"""
     try:
@@ -192,6 +201,7 @@ def get_asteroid_by_id(asteroid_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/asteroids/dangerous/")
+@app.get("/api/asteroids/dangerous/")
 def get_dangerous_asteroids():
     """Obtener asteroides potencialmente peligrosos"""
     try:
@@ -214,6 +224,7 @@ def get_dangerous_asteroids():
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/asteroids/upcoming/")
+@app.get("/api/asteroids/upcoming/")
 def get_upcoming_asteroids():
     """Obtener asteroides con próximos acercamientos"""
     try:
@@ -264,7 +275,6 @@ def get_api_info():
         "nasa_api_key_status": "configured" if NASA_API_KEY != "DEMO_KEY" else "using_demo_key"
     }
 
-# Endpoint para limpiar cache manualmente
 @app.post("/cache/clear")
 def clear_cache():
     """Limpiar cache y forzar actualización"""
@@ -272,6 +282,62 @@ def clear_cache():
     cache["last_update"] = None
     logger.info("🧹 Cache cleared manually")
     return {"message": "Cache cleared successfully"}
+
+# === SERVIR FRONTEND REACT ===
+# Montar archivos estáticos del frontend
+static_path = os.path.join(os.path.dirname(__file__), "..", "..", "static")
+if os.path.exists(static_path):
+    # Servir archivos estáticos (JS, CSS, etc.)
+    app.mount("/static", StaticFiles(directory=static_path), name="static_files")
+    
+    logger.info(f"✅ Serving static files from: {static_path}")
+    
+    # Catch-all para servir React App (debe estar al final)
+    @app.get("/{full_path:path}")
+    async def serve_react_app(full_path: str):
+        """Servir la aplicación React para todas las rutas que no sean API"""
+        
+        # No interceptar rutas de API
+        api_routes = ["api", "health", "docs", "openapi.json", "redoc", "asteroids", "info", "cache"]
+        if any(full_path.startswith(route) for route in api_routes):
+            raise HTTPException(status_code=404, detail="API endpoint not found")
+        
+        # Servir index.html para todas las demás rutas (React Router)
+        index_path = os.path.join(static_path, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+        else:
+            # Si no existe el build del frontend, mostrar mensaje informativo
+            return {
+                "message": "Frontend not built yet",
+                "note": "The React frontend will be available after the build completes",
+                "api_available": True,
+                "try_endpoints": ["/health", "/asteroids/", "/info"]
+            }
+
+else:
+    logger.warning("⚠️ Static files directory not found. Frontend will not be served.")
+    
+    # Endpoint raíz alternativo cuando no hay frontend
+    @app.get("/")
+    def read_root():
+        """Información básica cuando no hay frontend"""
+        return {
+            "name": "NEO Tracker API",
+            "version": "1.0.0",
+            "description": "API para monitoreo de asteroides cercanos a la Tierra",
+            "status": "API only - Frontend building",
+            "data_source": "NASA NeoWs API",
+            "nasa_api_key_configured": NASA_API_KEY != "DEMO_KEY",
+            "available_endpoints": [
+                "/health",
+                "/asteroids/",
+                "/asteroids/{id}",
+                "/asteroids/dangerous/",
+                "/asteroids/upcoming/",
+                "/info"
+            ]
+        }
 
 if __name__ == "__main__":
     import uvicorn
