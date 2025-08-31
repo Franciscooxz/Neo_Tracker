@@ -28,7 +28,7 @@ app.add_middleware(
 )
 
 # Configuración de NASA API
-NASA_API_KEY = "gmTGe7ZSmdQoNdgWBibcVlZdNBAn7BWnVmMdo5Ca"
+NASA_API_KEY = os.getenv("NASA_API_KEY", "DEMO_KEY")
 NASA_BASE_URL = "https://api.nasa.gov/neo/rest/v1"
 
 # Cache simple para evitar llamadas excesivas
