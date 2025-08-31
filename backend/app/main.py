@@ -285,7 +285,7 @@ def clear_cache():
 
 # === SERVIR FRONTEND REACT ===
 # Montar archivos estáticos del frontend
-static_path = os.path.join(os.path.dirname(__file__), "..", "..", "static")
+static_path = "/app/static"
 if os.path.exists(static_path):
     # Servir archivos estáticos (JS, CSS, etc.)
     app.mount("/static", StaticFiles(directory=static_path), name="static_files")
