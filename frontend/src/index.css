@@ -1,0 +1,491 @@
+/* Importar Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Importar fuentes espaciales */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap');
+
+/* Variables CSS espaciales */
+:root {
+  /* Colores espaciales */
+  --space-deep: #0B1426;
+  --space-dark: #1a1a2e;
+  --space-blue: #16213e;
+  --space-purple: #0f0f3d;
+  --nebula-blue: #1e3a8a;
+  --nebula-purple: #581c87;
+  --star-white: #ffffff;
+  --star-blue: #60a5fa;
+  --star-purple: #a855f7;
+  
+  /* Efectos ligeros */
+  --glow-blue: 0 0 15px rgba(96, 165, 250, 0.3);
+  --glow-purple: 0 0 15px rgba(168, 85, 247, 0.3);
+  --glow-red: 0 0 15px rgba(239, 68, 68, 0.4);
+  --glow-green: 0 0 15px rgba(34, 197, 94, 0.3);
+  
+  /* Gradientes estáticos (sin animación) */
+  --gradient-space: linear-gradient(135deg, var(--space-deep) 0%, var(--space-blue) 50%, var(--space-purple) 100%);
+  --gradient-nebula: linear-gradient(45deg, var(--nebula-blue) 0%, var(--nebula-purple) 100%);
+  --gradient-aurora: linear-gradient(90deg, #1e3a8a 0%, #581c87 25%, #7c3aed 50%, #a855f7 75%, #c084fc 100%);
+}
+
+/* Reset y estilos base espaciales */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--gradient-space);
+  color: #f8fafc;
+  line-height: 1.6;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* FONDO DE ESTRELLAS OPTIMIZADO - Solo 2 capas simples */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(1px 1px at 20px 30px, var(--star-white), transparent),
+    radial-gradient(1px 1px at 40px 70px, var(--star-blue), transparent),
+    radial-gradient(1px 1px at 90px 40px, var(--star-purple), transparent);
+  background-repeat: repeat;
+  background-size: 150px 80px;
+  animation: starsMove 30s linear infinite;
+  z-index: -2;
+  opacity: 0.6;
+}
+
+/* Dark mode específico para espacio */
+.dark body {
+  background: var(--gradient-space);
+  color: #f1f5f9;
+}
+
+/* Tipografía espacial */
+.font-orbitron {
+  font-family: 'Orbitron', monospace;
+}
+
+/* COMPONENTES OPTIMIZADOS */
+@layer components {
+  
+  /* 🚀 CARDS ESPACIALES - VERSION LIGERA */
+  .card-space {
+    @apply bg-gradient-to-br from-slate-800/60 to-slate-900/80;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(96, 165, 250, 0.2);
+    
+    /* Sombra simple pero efectiva */
+    box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  /* HOVER LIGERO - Solo transform y box-shadow */
+  .card-space:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 
+      0 10px 30px rgba(0, 0, 0, 0.4),
+      0 0 20px rgba(96, 165, 250, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-color: rgba(96, 165, 250, 0.4);
+  }
+
+  /* 🔴 CARDS PELIGROSAS - Solo pulso suave */
+  .card-danger {
+    @apply card-space;
+    background: linear-gradient(135deg, 
+      rgba(239, 68, 68, 0.15) 0%, 
+      rgba(127, 29, 29, 0.25) 100%);
+    border-color: rgba(239, 68, 68, 0.4);
+    box-shadow: 
+      0 4px 20px rgba(239, 68, 68, 0.2),
+      0 0 15px rgba(239, 68, 68, 0.3);
+  }
+
+  .card-danger:hover {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 
+      0 12px 35px rgba(239, 68, 68, 0.4),
+      0 0 25px rgba(239, 68, 68, 0.5);
+  }
+
+  /* ANIMACIÓN SUAVE para elementos críticos */
+  .danger-pulse {
+    animation: softPulse 3s ease-in-out infinite;
+  }
+
+  /* 🟢 CARDS SEGURAS */
+  .card-safe {
+    @apply card-space;
+    background: linear-gradient(135deg, 
+      rgba(34, 197, 94, 0.1) 0%, 
+      rgba(21, 128, 61, 0.2) 100%);
+    border-color: rgba(34, 197, 94, 0.3);
+  }
+
+  /* 🟡 CARDS DE ADVERTENCIA */
+  .card-warning {
+    @apply card-space;
+    background: linear-gradient(135deg, 
+      rgba(245, 158, 11, 0.12) 0%, 
+      rgba(180, 83, 9, 0.22) 100%);
+    border-color: rgba(245, 158, 11, 0.4);
+  }
+
+  /* 🌟 NÚMEROS LIGEROS - Sin gradientes animados pesados */
+  .number-glow {
+    color: #60a5fa;
+    text-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+    transition: text-shadow 0.2s ease;
+  }
+
+  .number-glow:hover {
+    text-shadow: 0 0 15px rgba(96, 165, 250, 0.8);
+  }
+
+  /* NÚMEROS CRÍTICOS - Solo para elementos importantes */
+  .number-critical {
+    color: #ef4444;
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+  }
+
+  .number-success {
+    color: #10b981;
+    text-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+  }
+
+  .number-warning {
+    color: #f59e0b;
+    text-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+  }
+
+  /* ESTADÍSTICAS CON EFECTO LIGERO */
+  .stat-card-optimized {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(96, 165, 250, 0.2);
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+  }
+
+  .stat-card-optimized:hover {
+    transform: translateY(-3px);
+    border-color: rgba(96, 165, 250, 0.4);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* 🌟 INDICADORES DE RIESGO SIMPLES */
+  .risk-indicator {
+    @apply w-4 h-4 rounded-full;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  .risk-indicator:hover {
+    transform: scale(1.1);
+  }
+
+  /* 🔴 RIESGO ALTO */
+  .risk-high {
+    background: radial-gradient(circle, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+  }
+
+  /* 🟡 RIESGO MEDIO */
+  .risk-medium {
+    background: radial-gradient(circle, #f59e0b 0%, #d97706 100%);
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+  }
+
+  /* 🟢 RIESGO BAJO */
+  .risk-low {
+    background: radial-gradient(circle, #10b981 0%, #059669 100%);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+  }
+
+  /* BOTONES OPTIMIZADOS */
+  .btn-space {
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-200;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(99, 102, 241, 0.8) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.5);
+    color: white;
+    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+  }
+  
+  .btn-space:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  }
+  
+  .btn-danger {
+    @apply btn-space;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.8) 0%, rgba(220, 38, 38, 0.8) 100%);
+    border-color: rgba(239, 68, 68, 0.5);
+  }
+  
+  /* INPUTS LIGEROS */
+  .input-space {
+    @apply w-full px-4 py-3 rounded-lg border transition-all duration-200;
+    background: rgba(15, 23, 42, 0.5);
+    border-color: rgba(148, 163, 184, 0.3);
+    color: #f1f5f9;
+    backdrop-filter: blur(5px);
+  }
+  
+  .input-space:focus {
+    @apply outline-none;
+    border-color: rgba(59, 130, 246, 0.8);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  /* NAVEGACIÓN LIGERA */
+  .nav-space {
+    @apply backdrop-blur-md;
+    background: rgba(15, 23, 42, 0.8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* LOADING SIMPLE */
+  .loading-space {
+    @apply inline-block w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full;
+    animation: spin 1s linear infinite;
+  }
+
+  /* EFECTO NEÓN SUAVE - Solo para títulos importantes */
+  .neon-title {
+    color: #60a5fa;
+    text-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+  }
+
+  /* EFECTOS DE ENTRADA LIGEROS */
+  .fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+}
+
+/* ANIMACIONES OPTIMIZADAS - Solo las esenciales */
+
+/* Movimiento suave de estrellas */
+@keyframes starsMove {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-80px); }
+}
+
+/* Pulso suave para elementos críticos */
+@keyframes softPulse {
+  0%, 100% { 
+    box-shadow: 
+      0 4px 20px rgba(239, 68, 68, 0.2),
+      0 0 15px rgba(239, 68, 68, 0.3);
+  }
+  50% { 
+    box-shadow: 
+      0 6px 25px rgba(239, 68, 68, 0.3),
+      0 0 20px rgba(239, 68, 68, 0.5);
+  }
+}
+
+/* Entrada suave */
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes slideUp {
+  0% { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* Rotación del asteroide - más lenta */
+@keyframes asteroidSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* UTILIDADES OPTIMIZADAS */
+@layer utilities {
+  
+  /* Animaciones de entrada ligeras */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+  
+  .animate-asteroid-spin {
+    animation: asteroidSpin 10s linear infinite;
+  }
+
+  /* Gradientes estáticos */
+  .bg-space-gradient {
+    background: var(--gradient-space);
+  }
+  
+  .bg-nebula-gradient {
+    background: var(--gradient-nebula);
+  }
+  
+  .bg-aurora-gradient {
+    background: var(--gradient-aurora);
+  }
+  
+  /* Efectos de cristal ligeros */
+  .glass-effect {
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .glass-dark {
+    backdrop-filter: blur(8px);
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Sombras simples */
+  .shadow-glow {
+    box-shadow: 0 0 15px rgba(96, 165, 250, 0.2);
+  }
+  
+  .shadow-glow-red {
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+  }
+  
+  .shadow-glow-green {
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+  }
+}
+
+/* Scrollbar espacial */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.6);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.8);
+}
+
+/* RESPONSIVE - Efectos aún más reducidos en móvil */
+@media (max-width: 768px) {
+  /* Reducir animaciones en móvil */
+  body::before {
+    animation-duration: 40s;
+    opacity: 0.3;
+  }
+  
+  .card-space:hover {
+    transform: translateY(-3px);
+  }
+
+  .card-danger:hover {
+    transform: translateY(-4px);
+  }
+
+  /* Desactivar algunos efectos en móvil */
+  .number-glow:hover {
+    text-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+  }
+}
+
+/* ACCESIBILIDAD - Respetar preferencias de movimiento */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  body::before {
+    animation: none;
+  }
+
+  .card-space:hover,
+  .card-danger:hover {
+    transform: none;
+  }
+}
+
+/* ALTO CONTRASTE */
+@media (prefers-contrast: high) {
+  :root {
+    --space-deep: #000000;
+    --space-dark: #000000;
+    --star-white: #ffffff;
+  }
+  
+  .card-space {
+    border: 2px solid #ffffff;
+    background: #000000;
+  }
+
+  .card-danger {
+    border: 2px solid #ff0000;
+    background: #330000;
+  }
+  
+  .card-safe {
+    border: 2px solid #00ff00;
+    background: #003300;
+  }
+}
+
+/* PRINT STYLES */
+@media print {
+  body::before {
+    display: none;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .card-space {
+    background: white !important;
+    border: 1px solid black !important;
+    box-shadow: none !important;
+  }
+}

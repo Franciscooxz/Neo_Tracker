@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#3B82F6" />
+    <meta name="description" content="NEO Tracker - Monitoreo de asteroides cercanos a la Tierra usando datos de NASA" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://neotracker.app/" />
+    <meta property="og:title" content="NEO Tracker - Monitoreo de Asteroides" />
+    <meta property="og:description" content="Aplicación web para monitorear asteroides cercanos a la Tierra usando datos de NASA NeoWs API" />
+    <meta property="og:image" content="%PUBLIC_URL%/og-image.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://neotracker.app/" />
+    <meta property="twitter:title" content="NEO Tracker - Monitoreo de Asteroides" />
+    <meta property="twitter:description" content="Aplicación web para monitorear asteroides cercanos a la Tierra usando datos de NASA NeoWs API" />
+    <meta property="twitter:image" content="%PUBLIC_URL%/og-image.png" />
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png" />
+    
+    <!-- Manifest for PWA -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Preconnect to external resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Keywords for SEO -->
+    <meta name="keywords" content="asteroides, nasa, espacio, astronomía, neos, monitoreo, tracker, api" />
+    <meta name="author" content="NEO Tracker Team" />
+    
+    <!-- Robots -->
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://neotracker.app/" />
+    
+    <title>🌌 NEO Tracker - Monitoreo de Asteroides</title>
+    
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "NEO Tracker",
+      "description": "Aplicación web para monitorear asteroides cercanos a la Tierra",
+      "url": "https://neotracker.app",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "creator": {
+        "@type": "Organization",
+        "name": "NEO Tracker Team"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <noscript>
+      <div style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #1f2937;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-family: system-ui, -apple-system, sans-serif;
+        z-index: 9999;
+      ">
+        <div>
+          <h1 style="font-size: 2rem; margin-bottom: 1rem;">🌌 NEO Tracker</h1>
+          <p style="font-size: 1.125rem; margin-bottom: 2rem;">
+            Esta aplicación requiere JavaScript para funcionar.
+          </p>
+          <p style="color: #9ca3af;">
+            Por favor, habilita JavaScript en tu navegador para continuar.
+          </p>
+        </div>
+      </div>
+    </noscript>
+    
+    <!-- Loading screen -->
+    <div id="loading-screen" style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #581c87 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: system-ui, -apple-system, sans-serif;
+      z-index: 9998;
+    ">
+      <div>
+        <div style="
+          font-size: 3rem;
+          margin-bottom: 1rem;
+          animation: spin 2s linear infinite;
+        ">🌌</div>
+        <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">NEO Tracker</h2>
+        <p style="color: #cbd5e1;">Iniciando monitoreo espacial...</p>
+        <div style="
+          width: 200px;
+          height: 4px;
+          background: rgba(255,255,255,0.2);
+          border-radius: 2px;
+          margin: 1rem auto;
+          overflow: hidden;
+        ">
+          <div style="
+            width: 100%;
+            height: 100%;
+            background: #3b82f6;
+            border-radius: 2px;
+            animation: loading 2s ease-in-out infinite;
+          "></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Main app container -->
+    <div id="root"></div>
+    
+    <!-- Loading screen animation styles -->
+    <style>
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      
+      @keyframes loading {
+        0% { transform: translateX(-100%); }
+        50% { transform: translateX(0%); }
+        100% { transform: translateX(100%); }
+      }
+    </style>
+    
+    <!-- Script to hide loading screen when React loads -->
+    <script>
+      // Hide loading screen when React has loaded
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          const loadingScreen = document.getElementById('loading-screen');
+          if (loadingScreen) {
+            loadingScreen.style.opacity = '0';
+            loadingScreen.style.transition = 'opacity 0.5s ease-out';
+            setTimeout(function() {
+              loadingScreen.style.display = 'none';
+            }, 500);
+          }
+        }, 1000); // Mostrar loading por al menos 1 segundo
+      });
+      
+      // También hide loading screen si React carga antes
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+          const root = document.getElementById('root');
+          if (root && root.children.length > 0) {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+              loadingScreen.style.display = 'none';
+            }
+          }
+        }, 2000); // Timeout de seguridad
+      });
+    </script>
+    
+    <!-- Analytics placeholder -->
+    <!-- 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+    -->
+  </body>
+</html>
