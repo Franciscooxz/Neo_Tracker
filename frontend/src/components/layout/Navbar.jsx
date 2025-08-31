@@ -189,7 +189,7 @@ const Navbar = () => {
 
             {/* Link a GitHub con efecto */}
             <a
-              href="https://github.com"
+              href="https://github.com/Franciscooxz/Neo_Tracker"
               target="_blank"
               rel="noopener noreferrer"
               className="
@@ -307,7 +307,7 @@ const Navbar = () => {
                 </a>
                 
                 <a
-                  href="https://github.com"
+                  href="https://github.com/Franciscooxz/Neo_Tracker"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center space-x-2 px-3 py-2 bg-glass-enhanced rounded-lg border border-gray-500/20 text-gray-300 hover:text-gray-100 transition-all"

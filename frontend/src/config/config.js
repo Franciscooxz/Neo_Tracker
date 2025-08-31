@@ -1,29 +1,74 @@
 // frontend/src/config/config.js
 /**
  * Configuración central de la aplicación NEO Tracker
+ * VERSIÓN CORREGIDA - Compatible con Railway
  * 
  * ARQUITECTURA DE CONFIGURACIÓN:
  * - Centralización de constantes
- * - Variables de entorno
- * - Configuración por ambiente
- * - URLs y endpoints
+ * - Variables de entorno con fallbacks
+ * - Configuración por ambiente (development, production, railway)
+ * - URLs y endpoints dinámicos
  * - Configuración de temas y UI
+ * - Detección automática de plataforma de deploy
  */
 
-// Variables de entorno
+// Función para detectar el entorno de despliegue
+const detectDeploymentPlatform = () => {
+  if (process.env.RAILWAY_ENVIRONMENT) return 'railway';
+  if (process.env.VERCEL_ENV) return 'vercel';
+  if (process.env.NETLIFY) return 'netlify';
+  return 'standard';
+};
+
+// Función para obtener la URL base de la API
+const getApiBaseUrl = () => {
+  // 1. Prioridad: Variable de entorno explícita
+  if (process.env.REACT_APP_API_BASE_URL) {
+    return process.env.REACT_APP_API_BASE_URL;
+  }
+  
+  // 2. Railway auto-detection
+  if (process.env.RAILWAY_ENVIRONMENT) {
+    // Construir URL basada en variables de Railway
+    const serviceName = process.env.RAILWAY_SERVICE_NAME || 'backend';
+    return `https://${serviceName}.up.railway.app`;
+  }
+  
+  // 3. Otros entornos de producción
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://api.neotracker.com'; // Tu dominio personalizado
+  }
+  
+  // 4. Desarrollo local
+  return 'http://127.0.0.1:8000';
+};
+
+// Variables de entorno mejoradas
 export const ENV = {
   NODE_ENV: process.env.NODE_ENV || 'development',
-  API_BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://127.0.0.1:8000',
+  DEPLOYMENT_PLATFORM: detectDeploymentPlatform(),
+  IS_RAILWAY: !!process.env.RAILWAY_ENVIRONMENT,
+  IS_PRODUCTION: process.env.NODE_ENV === 'production',
+  API_BASE_URL: getApiBaseUrl(),
   NASA_API_KEY: process.env.REACT_APP_NASA_API_KEY || null,
   VERSION: process.env.REACT_APP_VERSION || '1.0.0'
 };
 
-// Configuración de API
+// Log de configuración para debugging
+console.log('🔧 Environment Configuration:', {
+  NODE_ENV: ENV.NODE_ENV,
+  PLATFORM: ENV.DEPLOYMENT_PLATFORM,
+  API_URL: ENV.API_BASE_URL,
+  IS_RAILWAY: ENV.IS_RAILWAY,
+  IS_PROD: ENV.IS_PRODUCTION
+});
+
+// Configuración de API mejorada
 export const API_CONFIG = {
   BASE_URL: ENV.API_BASE_URL,
-  TIMEOUT: 30000, // 30 segundos
-  RETRY_ATTEMPTS: 3,
-  RETRY_DELAY: 1000, // 1 segundo
+  TIMEOUT: ENV.IS_PRODUCTION ? 45000 : 30000, // Más tiempo en producción
+  RETRY_ATTEMPTS: ENV.IS_PRODUCTION ? 5 : 3,
+  RETRY_DELAY: 1000,
   
   ENDPOINTS: {
     ASTEROIDS: '/asteroids/',
@@ -177,7 +222,7 @@ export const LIMITS = {
   SEARCH_DEBOUNCE_MS: 300,
   MAX_ASTEROIDS_DISPLAY: 1000,
   CACHE_DURATION_MS: 5 * 60 * 1000, // 5 minutos
-  REQUEST_TIMEOUT_MS: 30000          // 30 segundos
+  REQUEST_TIMEOUT_MS: ENV.IS_PRODUCTION ? 45000 : 30000 // Más tiempo en prod
 };
 
 // Textos y etiquetas
@@ -199,7 +244,8 @@ export const LABELS = {
     SERVER: 'Error del servidor. Intenta nuevamente en unos momentos.',
     NOT_FOUND: 'El recurso solicitado no fue encontrado.',
     TIMEOUT: 'La solicitud tardó demasiado. Intenta nuevamente.',
-    UNKNOWN: 'Ha ocurrido un error inesperado.'
+    UNKNOWN: 'Ha ocurrido un error inesperado.',
+    RAILWAY_STARTUP: 'El servicio está iniciando en Railway. Espera unos momentos...'
   },
   
   SUCCESS_MESSAGES: {
@@ -214,17 +260,19 @@ export const EXTERNAL_LINKS = {
   NASA_NEOWS: 'https://api.nasa.gov/neo/rest/v1',
   NASA_JPL: 'https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html',
   NASA_API_DOCS: 'https://api.nasa.gov/',
-  GITHUB: 'https://github.com',
+  GITHUB: 'https://github.com/Franciscooxz/Neo_Tracker',
   REACT_DOCS: 'https://react.dev/',
-  FASTAPI_DOCS: 'https://fastapi.tiangolo.com/'
+  FASTAPI_DOCS: 'https://fastapi.tiangolo.com/',
+  RAILWAY_DOCS: 'https://docs.railway.app/'
 };
 
 // Configuración de desarrollo
 export const DEV_CONFIG = {
-  ENABLE_LOGGING: ENV.NODE_ENV === 'development',
+  ENABLE_LOGGING: ENV.NODE_ENV === 'development' || ENV.IS_RAILWAY,
   ENABLE_DEBUG: ENV.NODE_ENV === 'development',
   MOCK_DELAYS: ENV.NODE_ENV === 'development' ? 500 : 0,
-  SHOW_GRID: false // Para debug de layout
+  SHOW_GRID: false, // Para debug de layout
+  SHOW_API_LOGS: true // Railway logs son útiles
 };
 
 // Configuración de features flags
@@ -234,7 +282,9 @@ export const FEATURES = {
   ENABLE_DARK_MODE: true,
   ENABLE_NOTIFICATIONS: true,
   ENABLE_OFFLINE_SUPPORT: false,
-  ENABLE_PWA: false
+  ENABLE_PWA: ENV.IS_PRODUCTION,
+  ENABLE_ERROR_BOUNDARY: true,
+  ENABLE_PERFORMANCE_MONITORING: ENV.IS_PRODUCTION
 };
 
 // Metadata de la aplicación
@@ -265,48 +315,77 @@ export const APP_METADATA = {
   }
 };
 
-// Configuración por ambiente
+// Configuración por ambiente MEJORADA
 export const getEnvironmentConfig = () => {
   const baseConfig = {
     API_URL: API_CONFIG.BASE_URL,
     DEBUG: DEV_CONFIG.ENABLE_LOGGING,
-    FEATURES
+    FEATURES,
+    PLATFORM: ENV.DEPLOYMENT_PLATFORM
   };
 
-  switch (ENV.NODE_ENV) {
-    case 'development':
+  switch (ENV.DEPLOYMENT_PLATFORM) {
+    case 'railway':
       return {
         ...baseConfig,
-        API_URL: 'http://127.0.0.1:8000',
-        DEBUG: true,
-        MOCK_DELAYS: 500
+        API_URL: ENV.API_BASE_URL,
+        DEBUG: true, // Railway logs son útiles
+        MOCK_DELAYS: 0,
+        TIMEOUT: 45000, // Railway puede ser más lento
+        RETRY_ATTEMPTS: 5,
+        ENVIRONMENT: 'railway-production'
       };
       
-    case 'production':
+    case 'vercel':
       return {
         ...baseConfig,
-        API_URL: process.env.REACT_APP_API_BASE_URL || 'https://api.neotracker.com',
+        API_URL: ENV.API_BASE_URL,
         DEBUG: false,
-        MOCK_DELAYS: 0
-      };
-      
-    case 'test':
-      return {
-        ...baseConfig,
-        API_URL: 'http://localhost:8000',
-        DEBUG: false,
-        MOCK_DELAYS: 0
+        MOCK_DELAYS: 0,
+        TIMEOUT: 30000,
+        ENVIRONMENT: 'vercel-production'
       };
       
     default:
-      return baseConfig;
+      // Local development o production estándar
+      switch (ENV.NODE_ENV) {
+        case 'development':
+          return {
+            ...baseConfig,
+            API_URL: 'http://127.0.0.1:8000',
+            DEBUG: true,
+            MOCK_DELAYS: 500,
+            TIMEOUT: 30000
+          };
+          
+        case 'production':
+          return {
+            ...baseConfig,
+            API_URL: ENV.API_BASE_URL,
+            DEBUG: false,
+            MOCK_DELAYS: 0,
+            TIMEOUT: 30000
+          };
+          
+        case 'test':
+          return {
+            ...baseConfig,
+            API_URL: 'http://localhost:8000',
+            DEBUG: false,
+            MOCK_DELAYS: 0,
+            TIMEOUT: 15000
+          };
+          
+        default:
+          return baseConfig;
+      }
   }
 };
 
 // Exportar configuración activa
 export const CONFIG = getEnvironmentConfig();
 
-// Utilidades de configuración
+// Utilidades de configuración MEJORADAS
 export const utils = {
   // Obtener color de riesgo
   getRiskColor: (riskLevel) => {
@@ -333,7 +412,32 @@ export const utils = {
   // Verificar si una feature está habilitada
   isFeatureEnabled: (feature) => {
     return FEATURES[feature] === true;
+  },
+  
+  // Obtener configuración de timeout basada en el entorno
+  getTimeout: () => {
+    return CONFIG.TIMEOUT || API_CONFIG.TIMEOUT;
+  },
+  
+  // Verificar si estamos en Railway
+  isRailwayEnvironment: () => {
+    return ENV.IS_RAILWAY;
+  },
+  
+  // Log de debugging condicional
+  debugLog: (message, data = null) => {
+    if (DEV_CONFIG.ENABLE_LOGGING) {
+      console.log(`🔍 [${ENV.DEPLOYMENT_PLATFORM.toUpperCase()}] ${message}`, data || '');
+    }
   }
 };
+
+// Log final de configuración
+utils.debugLog('Configuration loaded successfully', {
+  environment: ENV.NODE_ENV,
+  platform: ENV.DEPLOYMENT_PLATFORM,
+  apiUrl: CONFIG.API_URL,
+  features: Object.entries(FEATURES).filter(([_, enabled]) => enabled).map(([key]) => key)
+});
 
 export default CONFIG;

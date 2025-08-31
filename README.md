@@ -268,7 +268,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 - **Autor**: Francisco Diaz
 - **Correo**: franciscodiazzxzz02@gmail.com
-- **GitHub**: [https://github.com/tu-usuario](https://github.com/Franciscooxz)
+- **GitHub**:(https://github.com/Franciscooxz)
 
 ## Reconocimientos
 
